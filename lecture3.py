@@ -5,6 +5,7 @@ key = 0
 while(key != 27):
     
     img = cv2.imread("lion.png")
-    cv2.show("???",img)
+    cv2.imshow("???",img)
     key = cv2.waitKey(1)
+
 cv2.destroyAllWindows()
