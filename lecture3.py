@@ -4,7 +4,7 @@ key = 0
 
 while(key != 27):
     
-    img = cv2.imread("lion.png")
+    img = cv2.imread("lion.jpg")
     cv2.imshow("???",img)
     key = cv2.waitKey(1)
 
