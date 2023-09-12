@@ -1,12 +1,12 @@
 import cv2
-
+import numpy
 
 python_logo = cv2.imread("tinypic.png")
 print(f"Type of variable: {type(python_logo)}")
 print(f"Type of data in array: {python_logo.dtype}")
 print(f"Shape of array: {python_logo.shape}")
 
-pixel_value = python_logo[70, 40] # B, G, R
+pixel_value = python_logo[2, ] # B, G, R
 print(pixel_value)
 
 # Slicing
