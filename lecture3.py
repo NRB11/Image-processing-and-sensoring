@@ -2,9 +2,9 @@ import cv2
 import random
 key = 0
 a = [8,9,12,13,16,17,27]
-random = random.randint(a)
-print(random)
-while(key != random):
+random = random.randint(0,7)
+print(a)
+while(key != a[random]):
     
     img = cv2.imread("lion.jpg")
     cv2.imshow("???",img)
