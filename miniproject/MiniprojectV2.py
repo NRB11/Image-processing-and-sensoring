@@ -1,7 +1,6 @@
 import cv2
 import numpy as np
 import struct
-import functools
 
 img = cv2.imread("miniproject/pictures/1.jpg")
 img2 = cv2.cvtColor(img,cv2.COLOR_BGR2HSV)
