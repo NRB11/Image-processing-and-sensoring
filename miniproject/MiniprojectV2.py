@@ -5,6 +5,8 @@ import struct
 img = cv2.imread("miniproject/pictures/1.jpg")
 img2 = cv2.cvtColor(img,cv2.COLOR_BGR2HSV)
 
+"""dictionary
+    
 images = { #declare dictionary with stuff (same as hashmap)
     struct.pack('ii', 0, 0): img2[0:100,   0:100],
     struct.pack('ii', 1, 0): img2[0:100, 100:200],
@@ -41,4 +43,11 @@ for x in range(5):
     for y in range(5):
         if struct.pack('ii', x, y) in images:
             print(x, y, np.average(images[struct.pack('ii', x, y)]))
+"""
+images = {}
 
+for x in range(5):
+    for y in range(5):
+        images[struct.pack('ii', x, y)] = img2[0+x*100:100 + x*100, 0+y*100:100+y*100]
+        if struct.pack('ii', x, y) in images:
+            print(x, y, np.average(images[struct.pack('ii', x, y)]))
