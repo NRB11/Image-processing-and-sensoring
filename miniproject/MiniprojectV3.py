@@ -7,7 +7,7 @@ from sklearn.cluster import KMeans
 img = cv2.imread("miniproject/pictures/1.jpg")
 img2 = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
 
-res = 45
+res = 5
 
 coloraverages_red = np.zeros((res, res))
 coloraverages_green = np.zeros((res, res))
