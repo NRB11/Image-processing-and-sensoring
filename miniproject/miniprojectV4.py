@@ -111,7 +111,7 @@ def label_object(square, name):
 
 def open_labeling_loop():
     # Load the image
-    img = cv2.imread("rbs_image.png")
+    img = cv2.imread("miniproject/pictures/1.jpg")
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
     height, width, channels = img.shape
