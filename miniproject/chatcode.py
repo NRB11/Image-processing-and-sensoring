@@ -66,9 +66,8 @@ for i, contour in enumerate(contours):
         continue
     cv2.rectangle(result_image, (x, y), (x + w, y + h), (0, 255, 0), 2)  # Draw green rectangles
 
+plt.imshow(normalized_color_averages, interpolation='nearest')
 cv2.imshow("Yellow Objects", result_image)
+plt.show()
 cv2.waitKey(0)
 cv2.destroyAllWindows()
-
-# plt.imshow(normalized_color_averages, interpolation='nearest')
-# plt.show()
