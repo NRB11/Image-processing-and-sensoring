@@ -4,6 +4,17 @@ import cv2
 import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
 
+def print_coordinates(contours):
+    for i, contour in enumerate(contours):
+        # Get the coordinates of the object
+        M = cv2.moments(contour)
+        if M["m00"] != 0:
+            cX = int(M["m10"] / M["m00"])
+            cY = int(M["m01"] / M["m00"])
+        else:
+            cX, cY = 0, 0
+        print(f"Object {i + 1} - Center Coordinates (x, y): ({cX}, {cY})")
+
 img = cv2.imread("miniproject/pictures/1.jpg")
 img2 = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
 
@@ -34,7 +45,30 @@ contours, _ = cv2.findContours(yellow_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_
 # Print the number of yellow objects found
 print(f"Number of yellow objects: {len(contours)}")
 
-cv2.imshow("yellow",yellow_mask)
-cv2.waitKey()
-#plt.imshow(normalized_color_averages, interpolation='nearest')
-#plt.show()
+# Define the region (x=400:500, y=400:500) to exclude yellow detection
+x_start, x_end, y_start, y_end = 400, 500, 400, 500
+
+# Iterate through contours and print coordinates while excluding the specified region
+for i, contour in enumerate(contours):
+    # Extract the centroid of the object
+    M = cv2.moments(contour)
+    if M["m00"] != 0:
+        cX = int(M["m10"] / M["m00"])
+        cY = int(M["m01"] / M["m00"])
+        if not (x_start <= cX < x_end and y_start <= cY < y_end):
+            print(f"Object {i + 1} - Center Coordinates (x, y): ({cX}, {cY})")
+
+# Draw rectangles around detected yellow objects and display the result
+result_image = img.copy()
+for i, contour in enumerate(contours):
+    x, y, w, h = cv2.boundingRect(contour)
+    if x_start <= x < x_end and y_start <= y < y_end:
+        continue
+    cv2.rectangle(result_image, (x, y), (x + w, y + h), (0, 255, 0), 2)  # Draw green rectangles
+
+cv2.imshow("Yellow Objects", result_image)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+
+# plt.imshow(normalized_color_averages, interpolation='nearest')
+# plt.show()
