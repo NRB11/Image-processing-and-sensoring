@@ -4,16 +4,29 @@ import cv2
 import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
 
-def print_coordinates(contours):
+def get_cell(x, y, res):
+    cell_width = 500 // res
+    cell_height = 500 // res
+    cell_x = x // cell_width
+    cell_y = y // cell_height
+    return cell_x, cell_y
+
+def print_coordinates_in_cells(contours, res, exclude_region):
+    cell_centers = []
+
     for i, contour in enumerate(contours):
-        # Get the coordinates of the object
+        # Find the center of mass of the object
         M = cv2.moments(contour)
         if M["m00"] != 0:
             cX = int(M["m10"] / M["m00"])
             cY = int(M["m01"] / M["m00"])
-        else:
-            cX, cY = 0, 0
-        print(f"Object {i + 1} - Center Coordinates (x, y): ({cX}, {cY})")
+            cell_x, cell_y = get_cell(cX, cY, res)
+            
+            if 0 <= cell_x < res and 0 <= cell_y < res and not (exclude_region[0] <= cX < exclude_region[1] and exclude_region[2] <= cY < exclude_region[3]):
+                print(f"Object {i + 1} - Center Coordinates (x, y): ({cX}, {cY}), Cell: ({cell_x}, {cell_y})")
+                cell_centers.append((cell_x, cell_y))
+
+    return cell_centers
 
 img = cv2.imread("miniproject/pictures/1.jpg")
 img2 = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
@@ -46,28 +59,22 @@ contours, _ = cv2.findContours(yellow_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_
 print(f"Number of yellow objects: {len(contours)}")
 
 # Define the region (x=400:500, y=400:500) to exclude yellow detection
-x_start, x_end, y_start, y_end = 400, 500, 400, 500
+exclude_region = (400, 500, 400, 500)
 
-# Iterate through contours and print coordinates while excluding the specified region
-for i, contour in enumerate(contours):
-    # Extract the centroid of the object
-    M = cv2.moments(contour)
-    if M["m00"] != 0:
-        cX = int(M["m10"] / M["m00"])
-        cY = int(M["m01"] / M["m00"])
-        if not (x_start <= cX < x_end and y_start <= cY < y_end):
-            print(f"Object {i + 1} - Center Coordinates (x, y): ({cX}, {cY})")
+# Get cell positions for contours while excluding the specified region
+cell_centers = print_coordinates_in_cells(contours, res, exclude_region)
 
 # Draw rectangles around detected yellow objects and display the result
 result_image = img.copy()
 for i, contour in enumerate(contours):
     x, y, w, h = cv2.boundingRect(contour)
-    if x_start <= x < x_end and y_start <= y < y_end:
-        continue
-    cv2.rectangle(result_image, (x, y), (x + w, y + h), (0, 255, 0), 2)  # Draw green rectangles
+    cell_x, cell_y = get_cell(x + w // 2, y + h // 2, res)
+    if 0 <= cell_x < res and 0 <= cell_y < res and not (exclude_region[0] <= x < exclude_region[1] and exclude_region[2] <= y < exclude_region[3]):
+        cv2.rectangle(result_image, (x, y), (x + w, y + h), (0, 255, 0), 2)  # Draw green rectangles
 
-plt.imshow(normalized_color_averages, interpolation='nearest')
 cv2.imshow("Yellow Objects", result_image)
-plt.show()
 cv2.waitKey(0)
 cv2.destroyAllWindows()
+
+# plt.imshow(normalized_color_averages, interpolation='nearest')
+# plt.show()
