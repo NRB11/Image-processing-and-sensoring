@@ -28,21 +28,35 @@ def print_cells_of_contours(contours, res, exclude_region):
 
     return cell_numbers
 
-def compute_average_colors_hsv(image, res):
+def compute_average_colors(image, res, exclude_region):
     cell_size = 500 // res
-    avg_colors_hsv = []
+    avg_colors = []
 
     for cell_x in range(res):
         for cell_y in range(res):
             x = cell_x * cell_size
             y = cell_y * cell_size
-            cell = image[y:y + cell_size, x:x + cell_size]
+            if not (exclude_region[0] <= x < exclude_region[1] and exclude_region[2] <= y < exclude_region[3]):
+                cell = image[y:y + cell_size, x:x + cell_size]
+                avg_color = np.mean(cell, axis=(0, 1))
+                avg_colors.append(avg_color)
 
-            # Compute the average color in HSV
-            avg_color_hsv = np.mean(cv2.cvtColor(cell, cv2.COLOR_BGR2HSV), axis=(0, 1))
-            avg_colors_hsv.append(avg_color_hsv)
+    return avg_colors
 
-    return avg_colors_hsv
+def categorize_color(rgb_value):
+    # Custom color mapping based on RGB values
+    color_categories = {
+        "Light Green": [(100, 200, 100), (0, 50, 0)],
+        "Dark Green": [(0, 100, 0), (0, 0, 0)],
+        "Brown": [(139, 69, 19), (165, 42, 42)],
+        "Blue": [(0, 0, 100), (0, 0, 255)],
+    }
+
+    for category, (min_range, max_range) in color_categories.items():
+        if all(min_val <= val <= max_val for val, (min_val, max_val) in zip(rgb_value, zip(min_range, max_range))):
+            return category
+
+    return "Other"
 
 img = cv2.imread("miniproject/pictures/1.jpg")
 img2 = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
@@ -50,7 +64,7 @@ img2 = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
 res = 5  # 5x5 grid, 25 cells
 
 # Threshold the HSV image to isolate the yellow color
-lower_yellow = np.array([20, 100, 180])  # Lower bound for yellow color in HSV
+lower_yellow = np.array([20, 100, 175])  # Lower bound for yellow color in HSV
 upper_yellow = np.array([30, 255, 255])  # Upper bound for yellow color in HSV
 yellow_mask = cv2.inRange(img2, lower_yellow, upper_yellow)
 
@@ -89,10 +103,15 @@ cv2.drawContours(result_image, contours, -1, (0, 255, 0), 2)
 for cell_number in cell_numbers:
     print(f"Cell {cell_number} contains an object")
 
-# Compute and display the average color of each cell in HSV
-avg_colors_hsv = compute_average_colors_hsv(result_image, res)
-for cell_number, avg_color_hsv in enumerate(avg_colors_hsv):
-    print(f"Cell {cell_number} - Average Color (HSV): {avg_color_hsv}")
+# Compute and display the average color of each cell (excluding the specified region)
+avg_colors = compute_average_colors(img, res, exclude_region)
+
+# Categorize the colors for each cell
+color_categories = [categorize_color(color) for color in avg_colors]
+
+# Print the color category for each cell
+for cell_number, category in enumerate(color_categories):
+    print(f"Cell {cell_number} - Color Category: {category}")
 
 # Create a separate window to display the image with contours
 #cv2.namedWindow("Cells with Objects and Contours", cv2.WINDOW_NORMAL)
