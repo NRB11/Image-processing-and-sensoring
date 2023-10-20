@@ -28,13 +28,29 @@ def print_cells_of_contours(contours, res, exclude_region):
 
     return cell_numbers
 
+def compute_average_colors_hsv(image, res):
+    cell_size = 500 // res
+    avg_colors_hsv = []
+
+    for cell_x in range(res):
+        for cell_y in range(res):
+            x = cell_x * cell_size
+            y = cell_y * cell_size
+            cell = image[y:y + cell_size, x:x + cell_size]
+
+            # Compute the average color in HSV
+            avg_color_hsv = np.mean(cv2.cvtColor(cell, cv2.COLOR_BGR2HSV), axis=(0, 1))
+            avg_colors_hsv.append(avg_color_hsv)
+
+    return avg_colors_hsv
+
 img = cv2.imread("miniproject/pictures/1.jpg")
 img2 = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
 
 res = 5  # 5x5 grid, 25 cells
 
 # Threshold the HSV image to isolate the yellow color
-lower_yellow = np.array([20, 100, 175])  # Lower bound for yellow color in HSV
+lower_yellow = np.array([20, 100, 180])  # Lower bound for yellow color in HSV
 upper_yellow = np.array([30, 255, 255])  # Upper bound for yellow color in HSV
 yellow_mask = cv2.inRange(img2, lower_yellow, upper_yellow)
 
@@ -66,11 +82,21 @@ for cell_x in range(res):
             y = cell_y * cell_size
             cv2.rectangle(result_image, (x, y), (x + cell_size, y + cell_size), (0, 0, 255), 2)  # Draw red rectangles
 
+# Draw contours in green
+cv2.drawContours(result_image, contours, -1, (0, 255, 0), 2)
+
 # Print the cell numbers containing objects
 for cell_number in cell_numbers:
     print(f"Cell {cell_number} contains an object")
 
-cv2.imshow("Cells with Objects", result_image)
+# Compute and display the average color of each cell in HSV
+avg_colors_hsv = compute_average_colors_hsv(result_image, res)
+for cell_number, avg_color_hsv in enumerate(avg_colors_hsv):
+    print(f"Cell {cell_number} - Average Color (HSV): {avg_color_hsv}")
+
+# Create a separate window to display the image with contours
+#cv2.namedWindow("Cells with Objects and Contours", cv2.WINDOW_NORMAL)
+cv2.imshow("Cells with Objects and Contours", result_image)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
 
