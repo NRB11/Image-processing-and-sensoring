@@ -85,6 +85,18 @@ def compute_average_hsb(image, res, exclude_region):
 
     return avg_hsbs
 
+def count_adjacent_cells_of_same_group(cell_x, cell_y, cell_groups):
+    group_name = custom_names.get((cell_x, cell_y))
+    if group_name:
+        adjacent_cells = [(cell_x+1, cell_y), (cell_x-1, cell_y), (cell_x, cell_y+1), (cell_x, cell_y-1)]
+        count = 0
+        for cell_x, cell_y in adjacent_cells:
+            if 0 <= cell_x < res and 0 <= cell_y < res:
+                if custom_names.get((cell_x, cell_y)) == group_name:
+                    count += 1
+        return count
+    return 0
+
 def categorize_hue(hue_value):
     # Define Hue ranges for categories
     hue_ranges = {
@@ -104,23 +116,22 @@ def display_hsb_values(avg_hsbs):
     for cell_name, avg_hsb_list in avg_hsbs.items():
         print(f"{cell_name}:")
         for i, (avg_hue, avg_saturation, avg_brightness) in enumerate(avg_hsb_list):
-            print(f"  Subcell {i + 1} ")
-            #- Avg Hue: {avg_hue:.2f}, Avg Saturation: {avg_saturation:.2f}, Avg Brightness: {avg_brightness:.2f}
+            print(f"  Subcell {i + 1} - Avg Hue: {avg_hue:.2f}, Avg Saturation: {avg_saturation:.2f}, Avg Brightness: {avg_brightness:.2f}")
 
 img = cv2.imread("miniproject/pictures/1.jpg")
 img2 = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
 
 res = 5  # 5x5 grid, 25 cells
 
-# Threshold the HSV image to isolate the yellow color
-lower_yellow = np.array([20, 100, 175])  # Lower bound for yellow color in HSV
-upper_yellow = np.array([30, 255, 255])  # Upper bound for yellow color in HSV
-yellow_mask = cv2.inRange(img2, lower_yellow, upper_yellow)
+# Threshold the HSV image to isolate the red color
+lower_red = np.array([0, 100, 100])  # Lower bound for red color in HSV
+upper_red = np.array([10, 255, 255])  # Upper bound for red color in HSV
+red_mask = cv2.inRange(img2, lower_red, upper_red)
 
-# Find contours in the yellow mask
-contours, _ = cv2.findContours(yellow_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+# Find contours in the red mask
+contours, _ = cv2.findContours(red_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-# Define the region (x=400:500, y=400:500) to exclude yellow detection
+# Define the region (x=400:500, y=400:500) to exclude red detection
 exclude_region = (400, 500, 400, 500)
 
 # Manually assign custom names to cells
@@ -129,29 +140,17 @@ custom_names = assign_custom_names()
 # Group cells by the custom names
 cell_groups = group_cells_by_name(contours, custom_names)
 
-# Create an array to mark cells containing objects
-cells_with_objects = np.zeros((res, res), dtype=bool)
+# Create an array to store the number of adjacent cells of the same group for each cell with a red square
+adjacent_cells_counts = {}
 
-# Mark the cells containing objects
-for cell_group in cell_groups.values():
-    for cell_x, cell_y in cell_group:
-        cells_with_objects[cell_y, cell_x] = True
+# Calculate the number of adjacent cells of the same group for each cell with a red square
+for cell_x, cell_y in cell_groups.get("Crown", []):
+    count = count_adjacent_cells_of_same_group(cell_x, cell_y, cell_groups)
+    adjacent_cells_counts[(cell_x, cell_y)] = count
 
-# Draw rectangles around cells containing objects
-cell_size = 500 // res
-result_image = img.copy()
-for cell_x in range(res):
-    for cell_y in range(res):
-        if cells_with_objects[cell_y, cell_x]:
-            x = cell_x * cell_size
-            y = cell_y * cell_size
-            cv2.rectangle(result_image, (x, y), (x + cell_size, y + cell_size), (0, 0, 255), 2)  # Draw red rectangles
-
-# Compute average HSB values for each cell (excluding the specified region)
-avg_hsbs = compute_average_hsb(img, res, exclude_region)
-
-# Display HSB values for each cell
-display_hsb_values(avg_hsbs)
+# Display the number of adjacent cells of the same group for each cell with a red square
+for (cell_x, cell_y), count in adjacent_cells_counts.items():
+    print(f"Cell ({cell_x}, {cell_y}) with a red square has {count} adjacent cells of the same group.")
 
 # Create an array to store the average cell colors in BGR format
 avg_colors_bgr = {}
@@ -181,6 +180,5 @@ heatmap = cv2.resize(heatmap, (500, 500), interpolation=cv2.INTER_NEAREST)
 
 # Display the heatmap with cell colors
 cv2.imshow("Cell Colors Heatmap", heatmap)
-cv2.imshow("Board", result_image)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
