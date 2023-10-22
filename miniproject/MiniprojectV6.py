@@ -104,8 +104,8 @@ def display_hsb_values(avg_hsbs):
     for cell_name, avg_hsb_list in avg_hsbs.items():
         print(f"{cell_name}:")
         for i, (avg_hue, avg_saturation, avg_brightness) in enumerate(avg_hsb_list):
-            print(f"  Subcell {i + 1} - Avg Hue: {avg_hue:.2f}, {avg_saturation:.2f},  {avg_brightness:.2f}")
-            #
+            print(f"  Subcell {i + 1} ")
+            #- Avg Hue: {avg_hue:.2f}, {avg_saturation:.2f},  {avg_brightness:.2f}
 
 img = cv2.imread("miniproject/pictures/1.jpg")
 img2 = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
