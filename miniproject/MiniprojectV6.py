@@ -179,7 +179,7 @@ for cell_x in range(res):
 # Resize the heatmap for better visualization
 heatmap = cv2.resize(heatmap, (500, 500), interpolation=cv2.INTER_NEAREST)
 
-#this is done because if diffcilties with the autocalculation of the numbers so we manuelly print them
+#this is done because we had diffcilties with the autocalculation of the numbers so we manuelly print them
 print("Plains")
 print("Numbers of cell(s) with contoures in Plains: 3")
 print("Numbers of cell(s) connected to cells with contoures in Plains:   5")
