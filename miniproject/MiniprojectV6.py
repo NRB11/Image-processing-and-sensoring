@@ -184,19 +184,19 @@ print("Plains")
 print("Numbers of cell(s) with contoures in Plains: 3")
 print("Numbers of cells connected to cells with contoures in Plains:   5")
 
-print("Plains")
+print("Forrest")
 print("Numbers of cell(s) with contoures in Forrest: 1")
 print("Numbers of cells connected to cells with contoures in Forrest:  7")
 
-print("Plains")
+print("Water")
 print("Numbers of cell(s) with contoures in Water: 1")
 print("Numbers of cells connected to cells with contoures in Water:    3")
 
-print("Plains")
-print("Numbers of cell(s) with contoures in Moountain: 2")
+print("Mountain")
+print("Numbers of cell(s) with contoures in Mountain: 2")
 print("Numbers of cells connected to cells with contoures in Mountain: 2")
 
-print("Plains")
+print("Crown")
 print("Numbers of cell(s) with contoures in Crown: 0")
 print("Numbers of cells connected to cells with contoures in Crown:    0")
 
