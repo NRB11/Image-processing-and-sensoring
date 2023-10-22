@@ -1,6 +1,8 @@
 import struct
 import numpy as np
 import cv2
+import matplotlib.pyplot as plt
+from sklearn.cluster import KMeans
 
 def get_cell(x, y, res):
     cell_width = 500 // res
@@ -65,7 +67,7 @@ def find_connected_cells(group):
     for cell_x, cell_y in group:
         cells[cell_y, cell_x] = True
 
-    # Define the possible adjacent cell offsets
+    # Define the possible adjacent cell offsets (orthogonal connections)
     adjacent_offsets = [(1, 0), (-1, 0), (0, 1), (0, -1)]
 
     # Initialize variables to store subgroups
@@ -95,6 +97,8 @@ def find_connected_cells(group):
 
     return subgroups
 
+# Manually assign custom names to cells
+custom_names = assign_custom_names()
 
 def compute_average_hsb(image, res, exclude_region):
     cell_size = 500 // res
@@ -120,16 +124,22 @@ def compute_average_hsb(image, res, exclude_region):
 
     return avg_hsbs
 
+img = cv2.imread("miniproject/pictures/1.jpg")
+img2 = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+
+res = 5  # 5x5 grid, 25 cells
+
+# Define the region (x=400:500, y=400:500) to exclude yellow detection
+exclude_region = (400, 500, 400, 500)
+
+# Calculate average HSB values for each cell group
+avg_hsbs = compute_average_hsb(img, res, exclude_region)
+
 def display_hsb_values(avg_hsbs):
     for cell_name, avg_hsb_list in avg_hsbs.items():
         print(f"{cell_name}:")
         for i, (avg_hue, avg_saturation, avg_brightness) in enumerate(avg_hsb_list):
             print(f"  Subcell {i + 1} ")
-
-img = cv2.imread("miniproject/pictures/1.jpg")
-img2 = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-
-res = 5  # 5x5 grid, 25 cells
 
 # Threshold the HSV image to isolate the yellow color
 lower_yellow = np.array([20, 100, 175])  # Lower bound for yellow color in HSV
@@ -139,30 +149,37 @@ yellow_mask = cv2.inRange(img2, lower_yellow, upper_yellow)
 # Find contours in the yellow mask
 contours, _ = cv2.findContours(yellow_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-# Define the region (x=400:500, y=400:500) to exclude yellow detection
-exclude_region = (400, 500, 400, 500)
 
-# Manually assign custom names to cells
-custom_names = assign_custom_names()
 
 # Group cells by the custom names
 cell_groups = group_cells_by_name(contours, custom_names)
 
+# Create an array to mark cells containing objects
+cells_with_objects = np.zeros((res, res), dtype=bool)
+
+# Mark the cells containing objects
+for cell_group in cell_groups.values():
+    for cell_x, cell_y in cell_group:
+        cells_with_objects[cell_y, cell_x] = True
+
+# Draw rectangles around cells containing objects
+cell_size = 500 // res
+result_image = img.copy()
+for cell_x in range(res):
+    for cell_y in range(res):
+        if cells_with_objects[cell_y, cell_x]:
+            x = cell_x * cell_size
+            y = cell_y * cell_size
+            cv2.rectangle(result_image, (x, y), (x + cell_size, y + cell_size), (0, 0, 255), 2)  # Draw red rectangles
+            
 # Calculate and display the subgroups of connected cells within each group
 for cell_name, group in cell_groups.items():
     if cell_name in ["Plains", "Forrest", "Mountain", "Water", "Crown"]:  # Only consider specific groups
         subgroups = find_connected_cells(group)
         print(f"{cell_name}:")
-        print(f"Number of subgroups: {len(subgroups)}")
+        print(f"Number of clusters: {len(subgroups)}")
         for i, subgroup in enumerate(subgroups, 1):
-            print(f"Subgroup {i}: {len(subgroup)} cells")
-
-
-# Compute average HSB values for each cell (excluding the specified region)
-avg_hsbs = compute_average_hsb(img, res, exclude_region)
-
-# Display HSB values for each cell
-display_hsb_values(avg_hsbs)
+            print(f"Cluster {i}: {len(subgroup)} cells")
 
 # Create an array to store the average cell colors in BGR format
 avg_colors_bgr = {}
@@ -192,6 +209,6 @@ heatmap = cv2.resize(heatmap, (500, 500), interpolation=cv2.INTER_NEAREST)
 
 # Display the heatmap with cell colors
 cv2.imshow("Cell Colors Heatmap", heatmap)
-#cv2.imshow("Board", result_image)
+cv2.imshow("Board", result_image)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
