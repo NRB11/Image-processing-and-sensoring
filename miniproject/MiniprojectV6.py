@@ -104,8 +104,8 @@ def display_hsb_values(avg_hsbs):
     for cell_name, avg_hsb_list in avg_hsbs.items():
         print(f"{cell_name}:")
         for i, (avg_hue, avg_saturation, avg_brightness) in enumerate(avg_hsb_list):
-            print(f"  Subcell {i + 1} ")
-            #- Avg Hue: {avg_hue:.2f}, Avg Saturation: {avg_saturation:.2f}, Avg Brightness: {avg_brightness:.2f}
+            print(f"  Subcell {i + 1} - Avg Hue: {avg_hue:.2f}, {avg_saturation:.2f},  {avg_brightness:.2f}")
+            #
 
 img = cv2.imread("miniproject/pictures/1.jpg")
 img2 = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
@@ -182,23 +182,23 @@ heatmap = cv2.resize(heatmap, (500, 500), interpolation=cv2.INTER_NEAREST)
 #this is done because if diffcilties with the autocalculation of the numbers so we manuelly print them
 print("Plains")
 print("Numbers of cell(s) with contoures in Plains: 3")
-print("Numbers of cells connected to cells with contoures in Plains:   5")
+print("Numbers of cell(s) connected to cells with contoures in Plains:   5")
 
 print("Forrest")
 print("Numbers of cell(s) with contoures in Forrest: 1")
-print("Numbers of cells connected to cells with contoures in Forrest:  7")
+print("Numbers of cell(s) connected to cells with contoures in Forrest:  7")
 
 print("Water")
 print("Numbers of cell(s) with contoures in Water: 1")
-print("Numbers of cells connected to cells with contoures in Water:    3")
+print("Numbers of cell(s) connected to cells with contoures in Water:    3")
 
 print("Mountain")
 print("Numbers of cell(s) with contoures in Mountain: 2")
-print("Numbers of cells connected to cells with contoures in Mountain: 2")
+print("Numbers of cell(s) connected to cells with contoures in Mountain: 2")
 
 print("Crown")
 print("Numbers of cell(s) with contoures in Crown: 0")
-print("Numbers of cells connected to cells with contoures in Crown:    0")
+print("Numbers of cell(s) connected to cells with contoures in Crown:    0")
 
 print("Total points: 29 ")
 
